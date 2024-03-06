@@ -1,0 +1,12 @@
+thumbnail-1.5.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+thumbnail-1.5.dist-info/LICENSE,sha256=YVvE6NEl2rOpMZ5K2S6asax5nmgl-let6Om9yLpXZV4,1069
+thumbnail-1.5.dist-info/METADATA,sha256=L3diGSxWfQ2oo_HVAJB84PPcsSDL-WDwhd4SVHe84I8,17958
+thumbnail-1.5.dist-info/RECORD,,
+thumbnail-1.5.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+thumbnail-1.5.dist-info/WHEEL,sha256=g4nMs7d-Xl9-xC9XovUrsDHGXt-FT0E17Yqo92DEfvY,92
+thumbnail-1.5.dist-info/top_level.txt,sha256=c5KHYzMBqvivtdSf5WOtDWXc1FEX0eqn69vYCN0aLhA,10
+thumbnail/__init__.py,sha256=vri9zBUXr9Ed1ypdO63D-DyttpT8-Dd-qUmq2Ut-d9o,24
+thumbnail/__pycache__/__init__.cpython-310.pyc,,
+thumbnail/__pycache__/thumbnail.cpython-310.pyc,,
+thumbnail/mimedb.json,sha256=Vt_EwA_-dBvmqzXxk27brw3Hss4PqiGVa9HhJP19PKk,142474
+thumbnail/thumbnail.py,sha256=qkVcFslbU7rQfviq1rxcWtnM0rKxmhJDWN7KNbTIY8Q,3468
