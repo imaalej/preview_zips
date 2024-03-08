@@ -9,6 +9,7 @@ import random
 class MyFrame(wx.Frame):
     images = []
     def __init__(self, parent, title):
+
         screenSize = wx.DisplaySize()
         screenWidth = screenSize[0]
         screenHeight = screenSize[1]
@@ -29,12 +30,14 @@ class MyFrame(wx.Frame):
         self.main_wrapper = wx.BoxSizer(wx.VERTICAL)
         self.image_wrapper = wx.BoxSizer(wx.VERTICAL)
 
+
         #button start
-        open_single_btn = wx.Button(self.panel, label="Open Zip File", size=(200,100))
-        open_multiple_btn = wx.Button(self.panel, label="Open Zips Directory", size=(200,100))
-        open_multiple_unzipped_btn = wx.Button(self.panel,label="Open Image Directory", size=(200,100))
-        shuffle_btn = wx.Button(self.panel, label="Shuffle", size=(200,100))
-        clear_btn = wx.Button(self.panel, label="Clear", size=(200,100))
+        btn_size = (200,50)
+        open_single_btn = wx.Button(self.panel, label="Open Zip File", size=btn_size)
+        open_multiple_btn = wx.Button(self.panel, label="Open Zips Directory", size=btn_size)
+        open_multiple_unzipped_btn = wx.Button(self.panel,label="Open Image Directory", size=btn_size)
+        shuffle_btn = wx.Button(self.panel, label="Shuffle", size=btn_size)
+        clear_btn = wx.Button(self.panel, label="Clear", size=btn_size)
 
 
         open_single_btn.Bind(wx.EVT_BUTTON, self.on_open)
@@ -81,7 +84,6 @@ class MyFrame(wx.Frame):
         self.SetMenuBar(menubar)
         #Menu End
 
-        
         panelSizer = wx.BoxSizer(wx.VERTICAL)
         panelSizer.Add(self.main_wrapper, 0, wx.EXPAND | wx.ALL, 5)
         panelSizer.Add(self.scrolled_panel, 1, wx.EXPAND)
@@ -95,22 +97,32 @@ class MyFrame(wx.Frame):
         self.panel.Layout()
 
     def update_view(self):
+        wx.BeginBusyCursor()
+        progress_dialog = wx.ProgressDialog("Loading Images", "Loading...", maximum=len(self.images), parent=self, style=wx.PD_AUTO_HIDE | wx.PD_APP_MODAL)
+        progress_dialog.Update(0, "Loading...")
         self.image_wrapper.Clear(True)
-        counter = 0
+        current_width = 0
+        screen_width = self.GetSize()[0]
         if(len(self.images)>0):
             sizer = wx.WrapSizer(wx.HORIZONTAL)
-            for img in self.images:
-                if counter%(self.columns) == 0:
-                    self.image_wrapper.Add(sizer, flag = wx.ALL|wx.EXPAND, border=5)
+            #for img in self.images:
+            for index,img in enumerate(self.images):
+                if img.GetWidth() + current_width + 5> screen_width:
+                    self.image_wrapper.Add(sizer, flag = wx.ALL | wx.EXPAND, border=5)
                     sizer = wx.WrapSizer(wx.HORIZONTAL)
-                #sizer.Add(wx.StaticBitmap(self.scrolled_panel, -1, wx.Bitmap(img)), flag=wx.EXPAND)
+                    current_width = 0
+                current_width += img.GetWidth()
                 sizer.Add(wx.StaticBitmap(self.scrolled_panel, -1, wx.Bitmap(img)), flag=wx.EXPAND)
-                counter+=1
+                progress_dialog.Update(index+1)
+                wx.Yield()
             self.image_wrapper.Add(sizer, flag=wx.ALL | wx.EXPAND, border=5)
             self.image_wrapper.Layout()
+        progress_dialog.Destroy()
+        wx.EndBusyCursor()
         self.scrolled_panel.SetupScrolling()
 
     def clear_view(self, event):
+        self.images = []
         self.image_wrapper.Clear(True)
 
     def on_open(self, event):
@@ -142,21 +154,30 @@ class MyFrame(wx.Frame):
 
 
     def on_open_directory(self, event):
-        self.dirname = ''
-        self.images = []
-        dlg = wx.DirDialog(self, "Choose a folder", self.dirname, wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
-        if dlg.ShowModal() == wx.ID_OK:
-            dir_path = dlg.GetPath()
-            image_files = glob.glob(os.path.join(dir_path, '*.[Pp][Nn][Gg]')) + glob.glob(os.path.join(dir_path, '*.[Jj][Pp][Gg]')) + glob.glob(os.path.join(dir_path, '*.[Jj][Pp][Ee][Gg]'))
-            resized_images = [self.resize(img) for img in image_files]
-            image_list = []
-            for img in resized_images:
-                wx_image = wx.Image(img.size[0], img.size[1])
-                wx_image.SetData(img.convert('RGB').tobytes())
-                image_list.append(wx_image)
-            self.images.extend(image_list)
-        self.update_view()
-        self.SetStatusText("Path: " + dir_path)
+        dlg = wx.MessageDialog(self, "This will extract every subdirectory as well, are you sure?", "Confirmation", wx.YES_NO | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            self.dirname = ''
+            self.images = []
+            dlg = wx.DirDialog(self, "Choose a folder", self.dirname, wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+            if dlg.ShowModal() == wx.ID_OK:
+                dir_path = dlg.GetPath()
+                image_files = []
+                #image_files = glob.glob(os.path.join(dir_path, '*.[Pp][Nn][Gg]')) + glob.glob(os.path.join(dir_path, '*.[Jj][Pp][Gg]')) + glob.glob(os.path.join(dir_path, '*.[Jj][Pp][Ee][Gg]'))
+                for root, dirs, files in os.walk(dir_path):
+                    image_files.extend(glob.glob(os.path.join(root, '*.[Pp][Nn][Gg]')))
+                    image_files.extend(glob.glob(os.path.join(root, '*.[Jj][Pp][Gg]')))
+                    image_files.extend(glob.glob(os.path.join(root, '*.[Jj][Pp][Ee][Gg]')))
+
+                resized_images = [self.resize(img) for img in image_files]
+                image_list = []
+                for img in resized_images:
+                    wx_image = wx.Image(img.size[0], img.size[1])
+                    wx_image.SetData(img.convert('RGB').tobytes())
+                    image_list.append(wx_image)
+                self.images.extend(image_list)
+            self.update_view()
+            self.SetStatusText("Path: " + dir_path)
+            dlg.Destroy()
         dlg.Destroy()
 
     def on_shuffle(self, event):
@@ -201,6 +222,7 @@ class MyFrame(wx.Frame):
 
     def on_exit(self, event):
         self.Close(True)
+
 
 app = wx.App(False)
 frame = MyFrame(None, 'Zip_Preview')
