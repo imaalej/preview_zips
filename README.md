@@ -1,5 +1,4 @@
 # preview_zips
-v1.0.2_prerelease
 Utility tool to preview images in every zip in a folder, individual zip, or every subdirectory of a folder.
 I'm currently expanding this to preview different supported media types.
 
